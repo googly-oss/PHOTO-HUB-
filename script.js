@@ -80,25 +80,56 @@ const reelSound=document.getElementById('reelSound');
 
 if(reel && reelSound){
 
-  reelSound.addEventListener('click',async()=>{
+  reel.controls=false;
+  reel.muted=false;
+  reel.volume=1;
+
+  const setButton=(playing)=>{
+    reelSound.classList.toggle('playing',playing);
+    reelSound.innerHTML=playing
+      ? '<span>Ⅱ</span> REEL PLAYING · MUSIC ON'
+      : '<span>▶</span> PLAY REEL + MUSIC';
+  };
+
+  const playReel=async()=>{
     try{
-      reel.currentTime=0;
       reel.muted=false;
       reel.volume=1;
-
       await reel.play();
-
-      reelSound.classList.add('playing');
-      reelSound.innerHTML='<span>Ⅱ</span> REEL PLAYING · MUSIC ON';
-
+      setButton(true);
     }catch(error){
       console.log('Reel playback error:',error);
-      reelSound.innerHTML='<span>▶</span> TAP AGAIN TO PLAY';
+      setButton(false);
+      reelSound.innerHTML='<span>▶</span> TAP TO PLAY REEL + MUSIC';
+    }
+  };
+
+  reelSound.addEventListener('click',()=>{
+    if(reel.paused){
+      playReel();
+    }else{
+      reel.pause();
+      setButton(false);
+    }
+  });
+
+  reel.addEventListener('click',()=>{
+    if(reel.paused){
+      playReel();
+    }else{
+      reel.pause();
+      setButton(false);
     }
   });
 
   reel.addEventListener('ended',()=>{
-    reelSound.classList.remove('playing');
-    reelSound.innerHTML='<span>▶</span> PLAY REEL + MUSIC';
+    reel.currentTime=0;
+    setButton(false);
+  });
+
+  reel.addEventListener('pause',()=>{
+    if(!reel.ended){
+      setButton(false);
+    }
   });
 }
