@@ -77,61 +77,28 @@ document.getElementById('year').textContent=new Date().getFullYear();
 
 const reel=document.getElementById('reel');
 const reelSound=document.getElementById('reelSound');
-const reelAudio=document.getElementById('reelAudio');
 
-if(reel && reelSound && reelAudio){
-
-  const musicOn=()=>{
-    reelSound.classList.add('playing');
-    reelSound.innerHTML='<span>Ⅱ</span> REEL PLAYING · MUSIC ON';
-  };
-
-  const musicOff=()=>{
-    reelSound.classList.remove('playing');
-    reelSound.innerHTML='<span>▶</span> PLAY REEL + MUSIC';
-  };
+if(reel && reelSound){
 
   reelSound.addEventListener('click',async()=>{
     try{
-      reel.pause();
-      reelAudio.pause();
-
       reel.currentTime=0;
-      reelAudio.currentTime=0;
+      reel.muted=false;
+      reel.volume=1;
 
-      reel.muted=true;
-      reel.volume=0;
-
-      reelAudio.muted=false;
-      reelAudio.volume=1;
-
-      await reelAudio.play();
       await reel.play();
 
-      musicOn();
+      reelSound.classList.add('playing');
+      reelSound.innerHTML='<span>Ⅱ</span> REEL PLAYING · MUSIC ON';
 
     }catch(error){
-      console.log('Reel music error:',error);
-      musicOff();
+      console.log('Reel playback error:',error);
+      reelSound.innerHTML='<span>▶</span> TAP AGAIN TO PLAY';
     }
-  });
-
-  reel.addEventListener('timeupdate',()=>{
-    if(!reelAudio.paused){
-      if(Math.abs(reelAudio.currentTime-reel.currentTime)>0.15){
-        reelAudio.currentTime=reel.currentTime;
-      }
-    }
-  });
-
-  reel.addEventListener('pause',()=>{
-    if(!reelAudio.paused) reelAudio.pause();
   });
 
   reel.addEventListener('ended',()=>{
-    reelAudio.pause();
-    reelAudio.currentTime=0;
-    musicOff();
+    reelSound.classList.remove('playing');
+    reelSound.innerHTML='<span>▶</span> PLAY REEL + MUSIC';
   });
 }
-
