@@ -81,7 +81,7 @@ if(reel&&reelSound){
   const musicOff=()=>{reelSound.classList.remove('playing');reelSound.innerHTML='<span>▶</span> PLAY REEL + MUSIC'};
   reelSound.addEventListener('click',async()=>{
     try{
-      reel.currentTime=0; reel.muted=true; reel.volume=1;
+      reel.currentTime=0; reel.muted=false; reel.volume=1;
       if(reelAudio){reelAudio.currentTime=0; reelAudio.volume=1;}
       await reel.play();
       if(reelAudio) await reelAudio.play();
