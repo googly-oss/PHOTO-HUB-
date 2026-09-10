@@ -12,14 +12,11 @@ const categories={
 const descriptions={Weddings:'Stories of celebration, emotion and connection.',Couples:'Real people. Real emotions.',Portraits:'People, personality and expression.',Traditional:'Culture, rituals and beautiful traditions.','Baby & Family':'Little moments, lifelong memories.','Pre-Wedding':'Romantic stories before the big day.','Events':'Music, people and special moments.',Fashion:'Style, confidence and expression.'};
 const categoryFor=i=>Object.keys(categories).find(k=>categories[k].includes(i))||'Other';
 
-const catGrid=document.getElementById('catGrid');
 const categoryFilters=document.getElementById('categoryFilters');
 const categoryPreview=document.getElementById('categoryPreview');
 const categoryMasonry=document.getElementById('categoryMasonry');
 const categoryPreviewTitle=document.getElementById('categoryPreviewTitle');
 const categoryPreviewDesc=document.getElementById('categoryPreviewDesc');
-const descriptions={Weddings:'Stories of celebration, emotion and connection.',Couples:'Real people. Real emotions.',Portraits:'People, personality and expression.',Traditional:'Culture, rituals and beautiful traditions.', 'Baby & Family':'Little moments, lifelong memories.','Pre-Wedding':'Romantic stories before the big day.','Events':'Music, people and special moments.',Fashion:'Style, confidence and expression.'};
-const categoryFor=i=>Object.keys(categories).find(k=>categories[k].includes(i))||'Other';
 
 Object.keys(categories).forEach((name,i)=>{
   const b=document.createElement('button');
@@ -78,51 +75,21 @@ document.querySelector('.menu').onclick=()=>{const n=document.querySelector('.na
 document.querySelectorAll('.nav nav a').forEach(a=>a.addEventListener('click',()=>{document.querySelector('.nav nav').style.display='none'}));
 document.getElementById('year').textContent=new Date().getFullYear();
 
-const reel=document.getElementById('reel'), reelSound=document.getElementById('reelSound');
+const reel=document.getElementById('reel'), reelSound=document.getElementById('reelSound'), reelAudio=document.getElementById('reelAudio');
 if(reel&&reelSound){
-  // Reliable music playback: use the uploaded MP3 from the same user click.
-  const reelMusic=new Audio('assets/video/photo-hub-music.mp3');
-  reelMusic.preload='auto';
-  reelMusic.volume=1;
-  reel.muted=true;
-
-  const musicOn=()=>{
-    reelSound.classList.add('playing');
-    reelSound.innerHTML='<span>Ⅱ</span> MUSIC ON';
-  };
-  const musicOff=()=>{
-    reelSound.classList.remove('playing');
-    reelSound.innerHTML='<span>▶</span> PLAY REEL + MUSIC';
-  };
-  const stopMusic=()=>{
-    reelMusic.pause();
-    reelMusic.currentTime=0;
-  };
-
+  const musicOn=()=>{reelSound.classList.add('playing');reelSound.innerHTML='<span>Ⅱ</span> REEL PLAYING · MUSIC ON'};
+  const musicOff=()=>{reelSound.classList.remove('playing');reelSound.innerHTML='<span>▶</span> PLAY REEL + MUSIC'};
   reelSound.addEventListener('click',async()=>{
     try{
-      reel.pause();
-      reel.currentTime=0;
-      stopMusic();
+      reel.currentTime=0; reel.muted=true; reel.volume=1;
+      if(reelAudio){reelAudio.currentTime=0; reelAudio.volume=1;}
       await reel.play();
-      await reelMusic.play();
+      if(reelAudio) await reelAudio.play();
       musicOn();
-    }catch(e){
-      stopMusic();
-      reel.pause();
-      musicOff();
-      reelSound.innerHTML='<span>▶</span> TAP AGAIN TO PLAY WITH MUSIC';
-    }
+    }catch(e){reelSound.innerHTML='<span>▶</span> TAP AGAIN FOR MUSIC';}
   });
-
-  reel.addEventListener('pause',()=>{
-    if(!reel.ended){
-      reelMusic.pause();
-      musicOff();
-    }
-  });
-  reel.addEventListener('ended',()=>{
-    stopMusic();
-    musicOff();
-  });
+  reel.addEventListener('play',()=>{if(reelAudio && !reelAudio.paused)musicOn()});
+  reel.addEventListener('pause',()=>{if(reelAudio)reelAudio.pause()});
+  reel.addEventListener('ended',()=>{if(reelAudio){reelAudio.pause();reelAudio.currentTime=0;}musicOff()});
+  reel.addEventListener('timeupdate',()=>{if(reelAudio && !reelAudio.paused && Math.abs(reelAudio.currentTime-reel.currentTime)>0.12)reelAudio.currentTime=reel.currentTime});
 }
