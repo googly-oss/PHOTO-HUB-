@@ -134,4 +134,4 @@ if(reel && reelSound && reelAudio){
     musicOff();
   });
 }
-}
+
