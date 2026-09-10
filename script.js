@@ -13,67 +13,53 @@ const descriptions={Weddings:'Stories of celebration, emotion and connection.',C
 const categoryFor=i=>Object.keys(categories).find(k=>categories[k].includes(i))||'Other';
 
 const catGrid=document.getElementById('catGrid');
+const categoryFilters=document.getElementById('categoryFilters');
 const categoryPreview=document.getElementById('categoryPreview');
+const categoryMasonry=document.getElementById('categoryMasonry');
 const categoryPreviewTitle=document.getElementById('categoryPreviewTitle');
 const categoryPreviewDesc=document.getElementById('categoryPreviewDesc');
-const categoryMasonry=document.getElementById('categoryMasonry');
+const descriptions={Weddings:'Stories of celebration, emotion and connection.',Couples:'Real people. Real emotions.',Portraits:'People, personality and expression.',Traditional:'Culture, rituals and beautiful traditions.', 'Baby & Family':'Little moments, lifelong memories.','Pre-Wedding':'Romantic stories before the big day.','Events':'Music, people and special moments.',Fashion:'Style, confidence and expression.'};
+const categoryFor=i=>Object.keys(categories).find(k=>categories[k].includes(i))||'Other';
 
-function showCategory(name){
-  const arr=categories[name]||[];
-  categoryPreview.hidden=false;
-  categoryPreviewTitle.textContent=name.toUpperCase();
-  categoryPreviewDesc.textContent=descriptions[name]||'';
+Object.keys(categories).forEach((name,i)=>{
+  const b=document.createElement('button');
+  b.className='filter category-filter'+(i===0?' active':'');
+  b.textContent=name;
+  b.dataset.filter=name;
+  categoryFilters.appendChild(b);
+});
+
+function renderCategory(name){
+  categoryPreviewTitle.textContent=name;
+  categoryPreviewDesc.textContent=descriptions[name]||'A selection from the PHOTO HUB collection.';
   categoryMasonry.innerHTML='';
-  arr.forEach(i=>{
+  categories[name].forEach(i=>{
     const f=document.createElement('figure');
     f.innerHTML=`<img loading="lazy" src="${imgs[i]}" alt="${name} photograph by PHOTO HUB"><span class="tag">${name.toUpperCase()}</span>`;
     f.onclick=()=>openLightbox(i);
     categoryMasonry.appendChild(f);
   });
-  document.querySelectorAll('.cat').forEach(x=>x.classList.toggle('selected',x.dataset.filter===name));
 }
 
-Object.entries(categories).forEach(([name,arr])=>{
-  const el=document.createElement('article');
-  el.className='cat';
-  el.dataset.filter=name;
-  el.innerHTML=`<img src="${imgs[arr[0]]}" alt="${name} photography"><div class="cat-copy"><b>${name.toUpperCase()}</b><p>${descriptions[name]}</p></div>`;
-  el.onclick=()=>showCategory(name);
-  catGrid.appendChild(el);
+categoryFilters.addEventListener('click',e=>{
+  const b=e.target.closest('.category-filter');
+  if(!b)return;
+  document.querySelectorAll('.category-filter').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  renderCategory(b.dataset.filter);
 });
+renderCategory('Weddings');
 
-const filters=document.getElementById('filters');
-['All',...Object.keys(categories)].forEach((name,i)=>{
-  const b=document.createElement('button');
-  b.className='filter'+(i===0?' active':'');
-  b.textContent=name;
-  b.dataset.filter=name;
-  filters.appendChild(b);
-});
-
+// A Glimpse is intentionally a curated mixed selection, not a second category gallery.
+const glimpse=[19,44,30,28,5,34,13,17,10,31,2,38];
 const masonry=document.getElementById('masonry');
-let current='All', list=[];
-function render(){
-  masonry.innerHTML=''; list=[];
-  imgs.forEach((src,i)=>{
-    const cat=categoryFor(i);
-    if(current!=='All'&&cat!==current)return;
-    list.push(i);
-    const f=document.createElement('figure');
-    f.innerHTML=`<img loading="lazy" src="${src}" alt="${cat} photograph by PHOTO HUB"><span class="tag">${cat.toUpperCase()}</span>`;
-    f.onclick=()=>openLightbox(i);
-    masonry.appendChild(f);
-  });
-}
-filters.addEventListener('click',e=>{
-  if(!e.target.matches('.filter'))return;
-  document.querySelectorAll('.filter').forEach(x=>x.classList.remove('active'));
-  e.target.classList.add('active');
-  current=e.target.dataset.filter;
-  render();
-  if(current!=='All') showCategory(current);
+glimpse.forEach(i=>{
+  const cat=categoryFor(i);
+  const f=document.createElement('figure');
+  f.innerHTML=`<img loading="lazy" src="${imgs[i]}" alt="${cat} photograph by PHOTO HUB"><span class="tag">${cat.toUpperCase()}</span>`;
+  f.onclick=()=>openLightbox(i);
+  masonry.appendChild(f);
 });
-render();
 
 const lb=document.getElementById('lightbox'),lbImg=document.getElementById('lightboxImg'),lbCap=document.getElementById('lbCaption');
 let active=0;
@@ -92,21 +78,22 @@ document.querySelector('.menu').onclick=()=>{const n=document.querySelector('.na
 document.querySelectorAll('.nav nav a').forEach(a=>a.addEventListener('click',()=>{document.querySelector('.nav nav').style.display='none'}));
 document.getElementById('year').textContent=new Date().getFullYear();
 
-const reel=document.getElementById('reel'), reelSound=document.getElementById('reelSound'), reelAudio=document.getElementById('reelAudio');
+const reel=document.getElementById('reel'), reelSound=document.getElementById('reelSound');
 if(reel&&reelSound){
-  const musicOn=()=>{reelSound.classList.add('playing');reelSound.innerHTML='<span>Ⅱ</span> REEL PLAYING · MUSIC ON'};
-  const musicOff=()=>{reelSound.classList.remove('playing');reelSound.innerHTML='<span>▶</span> PLAY REEL + MUSIC'};
+  const musicOn=()=>{reelSound.classList.add('playing');reelSound.innerHTML='<span>Ⅱ</span> MUSIC ON';};
+  const musicOff=()=>{reelSound.classList.remove('playing');reelSound.innerHTML='<span>▶</span> PLAY REEL + MUSIC';};
   reelSound.addEventListener('click',async()=>{
     try{
-      reel.currentTime=0; reel.muted=true; reel.volume=1;
-      if(reelAudio){reelAudio.currentTime=0; reelAudio.volume=1;}
+      reel.currentTime=0;
+      reel.muted=false;
+      reel.volume=1;
       await reel.play();
-      if(reelAudio) await reelAudio.play();
       musicOn();
-    }catch(e){reelSound.innerHTML='<span>▶</span> TAP AGAIN FOR MUSIC';}
+    }catch(e){
+      reelSound.innerHTML='<span>▶</span> CLICK TO PLAY WITH MUSIC';
+    }
   });
-  reel.addEventListener('play',()=>{if(reelAudio && !reelAudio.paused)musicOn()});
-  reel.addEventListener('pause',()=>{if(reelAudio)reelAudio.pause()});
-  reel.addEventListener('ended',()=>{if(reelAudio){reelAudio.pause();reelAudio.currentTime=0;}musicOff()});
-  reel.addEventListener('timeupdate',()=>{if(reelAudio && !reelAudio.paused && Math.abs(reelAudio.currentTime-reel.currentTime)>0.12)reelAudio.currentTime=reel.currentTime});
+  reel.addEventListener('play',()=>{ if(!reel.muted) musicOn(); });
+  reel.addEventListener('pause',()=>{ if(!reel.ended) musicOff(); });
+  reel.addEventListener('ended',musicOff);
 }
