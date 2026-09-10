@@ -75,21 +75,24 @@ document.querySelector('.menu').onclick=()=>{const n=document.querySelector('.na
 document.querySelectorAll('.nav nav a').forEach(a=>a.addEventListener('click',()=>{document.querySelector('.nav nav').style.display='none'}));
 document.getElementById('year').textContent=new Date().getFullYear();
 
-const reel=document.getElementById('reel'), reelSound=document.getElementById('reelSound'), reelAudio=document.getElementById('reelAudio');
+const reel=document.getElementById('reel'), reelSound=document.getElementById('reelSound');
+
 if(reel&&reelSound){
-  const musicOn=()=>{reelSound.classList.add('playing');reelSound.innerHTML='<span>Ⅱ</span> REEL PLAYING · MUSIC ON'};
-  const musicOff=()=>{reelSound.classList.remove('playing');reelSound.innerHTML='<span>▶</span> PLAY REEL + MUSIC'};
   reelSound.addEventListener('click',async()=>{
     try{
-      reel.currentTime=0; reel.muted=false; reel.volume=1;
-      if(reelAudio){reelAudio.currentTime=0; reelAudio.volume=1;}
+      reel.currentTime=0;
+      reel.muted=false;
+      reel.volume=1;
       await reel.play();
-      if(reelAudio) await reelAudio.play();
-      musicOn();
-    }catch(e){reelSound.innerHTML='<span>▶</span> TAP AGAIN FOR MUSIC';}
+      reelSound.classList.add('playing');
+      reelSound.innerHTML='<span>Ⅱ</span> REEL PLAYING · MUSIC ON';
+    }catch(e){
+      reelSound.innerHTML='<span>▶</span> TAP AGAIN FOR MUSIC';
+    }
   });
-  reel.addEventListener('play',()=>{if(reelAudio && !reelAudio.paused)musicOn()});
-  reel.addEventListener('pause',()=>{if(reelAudio)reelAudio.pause()});
-  reel.addEventListener('ended',()=>{if(reelAudio){reelAudio.pause();reelAudio.currentTime=0;}musicOff()});
-  reel.addEventListener('timeupdate',()=>{if(reelAudio && !reelAudio.paused && Math.abs(reelAudio.currentTime-reel.currentTime)>0.12)reelAudio.currentTime=reel.currentTime});
+
+  reel.addEventListener('ended',()=>{
+    reelSound.classList.remove('playing');
+    reelSound.innerHTML='<span>▶</span> PLAY REEL + MUSIC';
+  });
 }
